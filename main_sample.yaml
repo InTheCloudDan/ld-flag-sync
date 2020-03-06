@@ -1,0 +1,8 @@
+project_key: demo-dan-030420-1
+environment_source: production
+environment_targets:
+    - uat
+flags:
+    - chatbox
+    - show-widgets
+    - dark-theme

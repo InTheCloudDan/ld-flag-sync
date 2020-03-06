@@ -1,0 +1,18 @@
+---
+    - name: Cleanup Project
+      hosts: localhost
+      gather_facts: no
+      vars_files:
+        - /ansible/playbooks/vars/main.yaml
+
+      tasks:
+        - name: Default value for LD API Key
+          set_fact: "api_key={{ lookup('env','LAUNCHDARKLY_ACCESS_TOKEN') }}"
+
+        - name: Copy Settings
+          launchdarkly_labs.collection.launchdarkly_feature_flag_sync:
+            project_key: "{{ project_key }}"
+            environment_key: "{{ environment_source }}"
+            environment_targets: "{{ environment_targets }}"
+            flag_key: "{{ item }}"
+          loop: "{{ flags }}"
