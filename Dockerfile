@@ -1,7 +1,7 @@
 FROM python:3.7-alpine3.9
 
 ENV ANSIBLE_VERSION 2.9.4
-
+ENV LAUNCHDARKLY_COLLECTION_VERSION 0.2.10
 ENV BUILD_PACKAGES \
   bash \
   curl \
@@ -45,7 +45,7 @@ RUN set -x && \
     echo "[local]" >> /etc/ansible/hosts && \
     echo "localhost" >> /etc/ansible/hosts
 
-RUN ansible-galaxy collection install launchdarkly_labs.collection && \
+RUN ansible-galaxy collection install launchdarkly_labs.collection:${LAUNCHDARKLY_COLLECTION_VERSION} && \
     python3 -m pip install -r ~/.ansible/collections/ansible_collections/launchdarkly_labs/collection/requirements.txt
 
 ENV ANSIBLE_GATHERING smart

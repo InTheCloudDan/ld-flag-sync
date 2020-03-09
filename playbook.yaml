@@ -13,6 +13,10 @@
             msg: cannot set included_actions and excluded_actions
           when: included_actions is defined and excluded_actions is defined
 
+        - fail:
+            msg: cannot set flag_filter and flags
+          when: flag_filter is defined and flags is defined
+
         - name: Default value for LD API Key
           set_fact: "api_key={{ lookup('env','LAUNCHDARKLY_ACCESS_TOKEN') }}"
 
@@ -26,39 +30,22 @@
         - name: Get Flags
           launchdarkly_labs.collection.launchdarkly_feature_flag_info:
             project_key: "{{ project_key }}"
+            archived: "{{ flag_filter.archived | default(omit) }}"
+            tag: "{{ flag_filter.tag | default(omit) }}"
           when: flags is undefined
           register: temp_flags
 
         - name: set flags
           set_fact:
-            new_flags : "{{ temp_flags.ansible_module_results['items'] }}"
-          when: temp_flags.ansible_module_results['items'] | default(False)
+            new_flags : "{{ temp_flags.feature_flags['items'] }}"
+          when: temp_flags.feature_flags is defined
 
-        - name: Copy Settings - Included Actions
+        - name: Copy Settings
           launchdarkly_labs.collection.launchdarkly_feature_flag_sync:
             project_key: "{{ project_key }}"
             environment_key: "{{ environment_source }}"
             environment_targets: "{{ environment_targets }}"
             flag_key: "{{ item.key }}"
-            included_actions: "{{ included_actions }}"
+            included_actions: "{{ included_actions | default(omit) }}"
+            excluded_actions: "{{ excluded_actions | default(omit) }}"
           loop: "{{ new_flags }}"
-          when: included_actions is defined and excluded_actions is undefined
-
-        - name: Copy Settings - Excluded Actions
-          launchdarkly_labs.collection.launchdarkly_feature_flag_sync:
-            project_key: "{{ project_key }}"
-            environment_key: "{{ environment_source }}"
-            environment_targets: "{{ environment_targets }}"
-            flag_key: "{{ item.key }}"
-            excluded_actions: "{{ excluded_actions }}"
-          loop: "{{ new_flags }}"
-          when: excluded_actions is defined and included_actions is undefined
-
-        - name: Copy Settings - Default
-          launchdarkly_labs.collection.launchdarkly_feature_flag_sync:
-            project_key: "{{ project_key }}"
-            environment_key: "{{ environment_source }}"
-            environment_targets: "{{ environment_targets }}"
-            flag_key: "{{ item.key }}"
-          loop: "{{ new_flags }}"
-          when: excluded_actions is undefined and included_actions is undefined

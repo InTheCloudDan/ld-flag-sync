@@ -2,6 +2,8 @@ project_key: demo-dan-030420-1
 environment_source: production
 environment_targets:
     - uat
+flag_filter:
+    tag: release-1-0
 flags:
     - chatbox
     - show-widgets
